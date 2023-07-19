@@ -6,17 +6,8 @@ from sklearn.preprocessing import OneHotEncoder, PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import ParameterGrid
-
-DATA_FILE_URL = "https://data.gov.lt/dataset/201/download/2853/05.csv"
-
-MOKINIAI_PAGAL_SAVIVALDYBES = "Bendrojo ugdymo mokiniai pagal savivaldybes.xlsx"
-
-
-def read_data() -> pd.DataFrame:
-    data = pd.read_excel(MOKINIAI_PAGAL_SAVIVALDYBES)
-    data.drop(index=data.index[-1], axis=0, inplace=True)
-    data["Metų pabaiga"] = data["BU Mokslo metai"].str[-4:]
-    return data
+from read_dataset import read_data
+from visualize import plot_students_count
 
 
 def prepare_school_data(data):
@@ -59,7 +50,7 @@ def create_testing_scenarios(study_year=[2016, 2030]):
     study_year_start, study_year_end = study_year
     param_grid = {
         "Metų pabaiga": range(study_year_start, study_year_end, 1),
-        "BU Institucijos savivaldybė": ["Kauno m. sav.", "Marijampolės sav."],
+        "BU Institucijos savivaldybė": ["Kauno m. sav."],
     }
     return pd.DataFrame(ParameterGrid(param_grid))
 
@@ -78,3 +69,5 @@ if __name__ == "__main__":
     predictions = model.predict(scenarios)
     r = scenarios.assign(predictions=predictions)
     print(r)
+    img = plot_students_count(r)
+    img.show()
